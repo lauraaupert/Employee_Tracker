@@ -27,20 +27,13 @@ CREATE TABLE department (
 );
 
 
-INSERT INTO people (name, has_pet, pet_name, pet_age)
-VALUES ("Ahmed", true, "Rockington", 100);
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
+VALUES ("Ahmed", "Yoyo", 3, 100);
 
-INSERT INTO people (name, has_pet, pet_name, pet_age)
-VALUES ("Ahmed", true, "Rockington", 100);
-
-INSERT INTO people (name, has_pet, pet_name, pet_age)
-VALUES ("Jacob",true,"Misty",10);
-
-INSERT INTO people (name, has_pet)
-VALUES ("Peter", false);
 
 UPDATE people
-SET has_pet = true, pet_name = "Franklin", pet_age = 2
+SET first_name = "Valhalla", manager_id = 3
 WHERE id = 4;
 
-SELECT * FROM people;
+SELECT * FROM employee;
+
