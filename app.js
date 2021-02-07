@@ -19,24 +19,56 @@ connection.connect(function(err) {
   askUser();
 });
 
+
+var roles = [
+    "Doctor",
+    "Engineer",
+    "Pilot",
+    "Chef",
+    "Can't see what you're looking for?"
+]
+var managers = [
+    "Albert",
+    "Hortencia",
+    "Daniel"
+]
+var departments = [
+    "Health",
+    "Tech",
+    "Aviation",
+    "Kitchen"
+]
+
 function askUser() {
     inquirer
-    .prompt({
+    .prompt([
+        {
         name: "action",
         type: "rawlist",
         message: "What would you like to do?",
         choices: [
             "Add employee",
+            "Add department",
+            "Add role",
             "Update information",
             "View information",
-            "Delete information"
+            "Delete information",
+            "Exit"
         ]
-    }).then(function(answer) {
+        }
+    ]).then(function(answer) {
         switch (answer.action) {
         
             case "Add employee":
-                userAdd();
+                addEmployee();
             break;
+            case "Add department":
+                addDepartment();
+            break;
+            case "Add role":
+                addRole();
+            break;
+
             case "Update information":
                 userUpdate();
             break;
@@ -50,46 +82,118 @@ function askUser() {
     })
 }
 
-function userAdd() {
+function addEmployee() {
     inquirer
-    .prompt(
+    .prompt([
         {
         name: "first_name",
         type: "input",
-        message: "Enter employee first name."
+        message: "Enter employee first name"
         },
         {
         name: "last_name",
         type: "input",
-        message: "Enter employee last name."
+        message: "Enter employee last name"
         },
         {
         name: "role_id",
         type: "rawlist",
         message: "Enter employee role.",
-        choices: [
-            "Doctor",
-            "Engineer",
-            "Pilot",
-            "Chef",
-            "Can't see what you're looking for?"
-        ]
-        })
+        choices: roles
+        },
+        {
+        name: "manager_id",
+        type: "rawlist",
+        message: "Enter employee's manager",
+        choices: managers
+        }
+    
+    ])
     .then(function(response) {
-        var query = connection.query(
+        var role = roles.indexOf(response.role_id) + 1
+        var manager = managers.indexOf(response.manager_id) + 1
+
+        query = connection.query(
             "INSERT INTO employee SET ?",
             {
                 first_name: response.first_name,
                 last_name: response.last_name,
-                role_id: response.role_id
+                role_id: role,
+                manager_id: manager
             },         
             function(err) {
                 if (err) throw err;
-                console.log("Your auction was created successfully!");
-                // re-prompt the user for if they want to bid or post
+                console.table(response);
+                console.log("You successfully added a new employee");
+                askUser()
             }      
         )
-      console.log(query)
         })  
     }
 
+    function addDepartment() {
+        inquirer
+        .prompt([
+            {
+            name: "department_name",
+            type: "input",
+            message: "Enter new department name"
+            },      
+        ])
+        .then(function(response) {
+            query = connection.query(
+                "INSERT INTO department SET ?",
+                {
+                    name: response.department_name,
+                },         
+                function(err) {
+                    if (err) throw err;
+                    console.table(response);
+                    console.log("You successfully added a new department");
+                    askUser()
+                }      
+            )
+            })  
+        }
+        function addRole() {
+            inquirer
+            .prompt([
+                {
+                name: "title",
+                type: "input",
+                message: "Enter new role title"
+                },
+                {
+                name: "salary",
+                type: "input",
+                message: "Enter new role salary"
+                },
+                {
+                name: "department_id",
+                type: "rawlist",
+                message: "Which department does this role belong to?",
+                choices: departments
+                },            
+            ])
+            .then(function(response) {
+                // var role = roles.indexOf(response.role_id) + 1
+                // var manager = managers.indexOf(response.manager_id) + 1
+                 var department = departments.indexOf(response.department_id) + 1
+                query = connection.query(
+                    "INSERT INTO role SET ?",
+                    {
+                        title: response.title,
+                        salary: response.salary,
+                        department_id: department,
+                    },         
+                    function(err) {
+                        if (err) throw err;
+                        console.table(response);
+                        console.log("You successfully added a new role");
+                        askUser()
+                    }      
+                )
+                })  
+            }
+        
+    
