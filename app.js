@@ -20,7 +20,7 @@ connection.connect(function(err) {
   askUser();
 });
 
-
+var employees = []
 var roles = [
     // "Doctor",
     // "Engineer",
@@ -82,18 +82,127 @@ function askUser() {
     })
 }
 
+function userDelete() {
+    inquirer
+    .prompt([
+    {
+        name: "employee",
+        type: "rawlist",
+        message: "Choose employee to delete.",
+        choices: chooseEmployee()
+        },
+    ]).then(function(response) {
+        var employee = employees.indexOf(response.employee)
+
+    connection.query(
+        "DELETE FROM employee WHERE ?",
+        {
+            id: employee
+        },
+        function(err) {
+            if (err) throw err;
+            console.table(response);
+            console.log("You successfully deleted an employee");
+            askUser()
+        }      
+
+    )
+})
+}
+
+function chooseEmployee() {
+    connection.query(
+        "SELECT id, last_name FROM employee",
+        function(err, answer) {
+            if (err) throw err;
+            for (var i = 0; i < answer.length; i++) {
+              employees.push(answer[i].last_name);
+            }
+        console.log(employees)
+          })
+          
+          return employees;
+
+        }
+
+
 function userView() {
-    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
+    inquirer
+    .prompt([
+        {
+        name: "view",
+        type: "rawlist",
+        message: "What information would you like view?",
+        choices: [
+            "Employees",
+            "Departments",
+            "Roles",
+        ]
+        }
+    ]).then(function(answer) {
+        switch (answer.view) {
+        
+            case "Employees":
+                connection.query("SELECT employee.first_name, employee.last_name, employee.role_id, employee.manager_id FROM employee",
+                // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
+                
+                //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
+                function(err, answer) {
+                    if (err) throw err;
+                    console.table(answer);
+                    // console.log("You successfully added a new employee");
+                    askUser()
+                }      
+            )
+            break;
+            case "Departments":
+                connection.query("SELECT department.name FROM department",
+                // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
+                
+                //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
+                function(err, answer) {
+                    if (err) throw err;
+                    console.table(answer);
+                    // console.log("You successfully added a new employee");
+                    askUser()
+                }      
+            )
+            break;
+            case "Roles":
+                connection.query("SELECT role.title, role.salary, role.department_id FROM role",
+                // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
+                
+                //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
+                function(err, answer) {
+                    if (err) throw err;
+                    console.table(answer);
+                    // console.log("You successfully added a new employee");
+                    askUser()
+                }      
+            )
+            break;
+        }
+    })
+}
+
+
+
+
+
+
+
+//     connection.query("SELECT employee.first_name, employee.last_name, employee.role_id, employee.manager_id FROM employee",
+//     // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
     
-    //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
-    function(err, answer) {
-        if (err) throw err;
-        console.table(answer);
-        console.log("You successfully added a new employee");
-        askUser()
-    }      
-)
-} 
+//     //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
+//     function(err, answer) {
+//         if (err) throw err;
+//         console.table(answer);
+//         // console.log("You successfully added a new employee");
+//         askUser()
+//     }      
+// )
+// } 
 
 
 function addEmployee() {
@@ -115,16 +224,16 @@ function addEmployee() {
         message: "Enter employee role.",
         choices: chooseRole()
         },
-        {
-        name: "manager_id",
-        type: "rawlist",
-        message: "Enter employee's manager",
-        choices: managers
-        }
+        // {
+        // name: "manager_id",
+        // type: "rawlist",
+        // message: "Enter employee's manager",
+        // choices: chooseManager()
+        // }
     
     ])
     .then(function(response) {
-        var role = roles.indexOf(response.role_id) + 1
+        var role = roles.indexOf(response.role_id) +1
         var manager = managers.indexOf(response.manager_id) + 1
 
         query = connection.query(
@@ -207,11 +316,47 @@ function addEmployee() {
                         if (err) throw err;
                         console.table(response);
                         console.log("You successfully added a new role");
-                        //askUser()
+                        askUser()
                     }      
                 )
                 })  
             }
+    
+    function chooseManager() {
+        connection.query(
+            "SELECT first_name FROM employee WHERE employee.manager_id IS NULL",
+            function(err, answer) {
+                if (err) throw err;
+                for (var i = 0; i < answer.length; i++) {
+                  managers.push(answer[i].name);
+                }
+            
+              })
+              return managers;
+            }
+
+    function chooseEmployee() {
+        connection.query(
+            "SELECT last_name FROM employee",
+            function(err, answer) {
+                if (err) throw err;
+                for (var i = 0; i < answer.length; i++) {
+                  employees.push(answer[i].last_name);
+                }
+            
+              })
+              
+              return employees;
+
+            }
+      
+                //console.table()
+                //askUser()
+            
+    //         })                 
+    // }      
+
+    
 
     function chooseDepartment() {
         connection.query(
@@ -257,25 +402,24 @@ function addEmployee() {
             name: "role",
             type: "rawlist",
             message: "Enter employee's new role",
-            choices: roles
+            choices: chooseRole()
             },
         ])
         .then(function(response) {
-            var role = roles.indexOf(response.role_id) + 1
+            //var role = roles.indexOf(response.role_id) + 1
 
             connection.query("UPDATE employee SET ? WHERE ?",
                 {
                     last_name: response.last_name
                 },
                 {
-                    role_id: role
+                    role_id: response.role
                 }, 
                 function(err) {
         if (err) throw err;
-        console.table(response);
+        // console.table(response);
         console.log("You successfully updated employee's role");
-        console.table(response)
-        askUser()
+        // askUser()
     
     })                 
 }) 
