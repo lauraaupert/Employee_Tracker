@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer")
 var dotenv = require("dotenv").config()
+var config = require("./config.js")
 
 var connection = mysql.createConnection({
 //   host: process.env.DB_HOST,
@@ -21,22 +22,22 @@ connection.connect(function(err) {
 
 
 var roles = [
-    "Doctor",
-    "Engineer",
-    "Pilot",
-    "Chef",
-    "Can't see what you're looking for?"
+    // "Doctor",
+    // "Engineer",
+    // "Pilot",
+    // "Chef",
+    // "Can't see what you're looking for?"
 ]
 var managers = [
-    "Albert",
-    "Hortencia",
-    "Daniel"
+    // "Albert",
+    // "Hortencia",
+    // "Daniel"
 ]
 var departments = [
-    "Health",
-    "Tech",
-    "Aviation",
-    "Kitchen"
+    // "Health",
+    // "Tech",
+    // "Aviation",
+    // "Kitchen"
 ]
 
 function askUser() {
@@ -50,10 +51,10 @@ function askUser() {
             "Add employee",
             "Add department",
             "Add role",
-            "Update information",
+            "Update employee role",
             "View information",
             "Delete information",
-            "Exit"
+            // "Exit"
         ]
         }
     ]).then(function(answer) {
@@ -68,8 +69,7 @@ function askUser() {
             case "Add role":
                 addRole();
             break;
-
-            case "Update information":
+            case "Update employee role":
                 userUpdate();
             break;
             case "View information":
@@ -81,6 +81,20 @@ function askUser() {
         }
     })
 }
+
+function userView() {
+    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
+    
+    //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
+    function(err, answer) {
+        if (err) throw err;
+        console.table(answer);
+        console.log("You successfully added a new employee");
+        askUser()
+    }      
+)
+} 
+
 
 function addEmployee() {
     inquirer
@@ -99,7 +113,7 @@ function addEmployee() {
         name: "role_id",
         type: "rawlist",
         message: "Enter employee role.",
-        choices: roles
+        choices: chooseRole()
         },
         {
         name: "manager_id",
@@ -155,6 +169,9 @@ function addEmployee() {
             )
             })  
         }
+
+
+
         function addRole() {
             inquirer
             .prompt([
@@ -172,7 +189,7 @@ function addEmployee() {
                 name: "department_id",
                 type: "rawlist",
                 message: "Which department does this role belong to?",
-                choices: departments
+                choices: chooseDepartment()
                 },            
             ])
             .then(function(response) {
@@ -190,10 +207,80 @@ function addEmployee() {
                         if (err) throw err;
                         console.table(response);
                         console.log("You successfully added a new role");
-                        askUser()
+                        //askUser()
                     }      
                 )
                 })  
             }
-        
+
+    function chooseDepartment() {
+        connection.query(
+            "SELECT name FROM department",
+            function(err, answer) {
+                if (err) throw err;
+                for (var i = 0; i < answer.length; i++) {
+                  departments.push(answer[i].name);
+                }
+            
+              })
+              return departments;
+            }
+      
+                //console.table()
+                //askUser()
+            
+    //         })                 
+    // }      
+    
+    function chooseRole() {
+        connection.query("SELECT * FROM role", function(err, answer) {
+          if (err) throw err
+          for (var i = 0; i < answer.length; i++) {
+            roles.push(answer[i].title);
+          }
+      
+        })
+        return roles;
+      }
+
+    
+
+    function userUpdate() {
+        inquirer
+        .prompt([
+            {
+            name: "last_name",
+            type: "input",
+            message: "Enter employee's last name"
+            },
+            {
+            name: "role",
+            type: "rawlist",
+            message: "Enter employee's new role",
+            choices: roles
+            },
+        ])
+        .then(function(response) {
+            var role = roles.indexOf(response.role_id) + 1
+
+            connection.query("UPDATE employee SET ? WHERE ?",
+                {
+                    last_name: response.last_name
+                },
+                {
+                    role_id: role
+                }, 
+                function(err) {
+        if (err) throw err;
+        console.table(response);
+        console.log("You successfully updated employee's role");
+        console.table(response)
+        askUser()
+    
+    })                 
+}) 
+
+}
+
+
     
