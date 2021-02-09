@@ -151,6 +151,80 @@ function deleteEmployee() {
 })
 })
 }
+function deleteDepartments() {
+    connection.query("SELECT name FROM department", function(err, answer) {
+         if (err) throw err
+         console.log(answer)
+    inquirer
+    .prompt([
+    {
+        name: "department",
+        type: "rawlist",
+        message: "Choose department to delete.",
+        choices: function() {
+            var department = [];
+            for (var i = 0; i < answer.length; i++) {
+              department.push(answer[i].name);
+            }
+            return department;
+          },
+        },
+    ]).then(function(response) {
+        //var employee = employees.indexOf(response.employee) + 1
+        //console.log(employee)
+        console.log(response.department)
+
+    connection.query(
+        "DELETE FROM department WHERE ?",
+        {
+            name: response.department
+        },
+        function(err) {
+            if (err) throw err;
+            console.table(response);
+            console.log("You successfully deleted a department");
+            askUser()
+        })
+})
+})
+}
+function deleteRoles() {
+    connection.query("SELECT role.title FROM role", function(err, answer) {
+         if (err) throw err
+         console.log(answer)
+    inquirer
+    .prompt([
+    {
+        name: "role",
+        type: "rawlist",
+        message: "Choose role to delete.",
+        choices: function() {
+            var role = [];
+            for (var i = 0; i < answer.length; i++) {
+              role.push(answer[i].title);
+            }
+            return role;
+          },
+        },
+    ]).then(function(response) {
+        //var employee = employees.indexOf(response.employee) + 1
+        //console.log(employee)
+        console.log(response.role)
+
+    connection.query(
+        "DELETE FROM role WHERE ?",
+        {
+            title: response.role
+        },
+        function(err) {
+            if (err) throw err;
+            console.table(response);
+            console.log("You successfully deleted a role");
+            askUser()
+        })
+})
+})
+}
 
 // function chooseEmployee() {
 //     connection.query(
