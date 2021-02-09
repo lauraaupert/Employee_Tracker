@@ -1,7 +1,8 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer")
 var dotenv = require("dotenv").config()
-var config = require("./config.js")
+var config = require("./config.js");
+const { Server } = require("http");
 
 var connection = mysql.createConnection({
 //   host: process.env.DB_HOST,
@@ -10,7 +11,7 @@ var connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
-  password: "",
+  password: "Ivegotmysql123",
   database: "employeetracker_db"
 });
 
@@ -20,8 +21,6 @@ connection.connect(function(err) {
   askUser();
 });
 
-var employees = [
-]
 var roles = [
     // "Doctor",
     // "Engineer",
@@ -55,7 +54,7 @@ function askUser() {
             "Update employee role",
             "View information",
             "Delete information",
-            // "Exit"
+            "Exit"
         ]
         }
     ]).then(function(answer) {
@@ -79,6 +78,10 @@ function askUser() {
             case "Delete information":
                 userDelete();
             break;
+            case "Exit":
+                process.exit()
+            break;
+
         }
     })
 }
@@ -261,12 +264,11 @@ function userView() {
         {
         name: "view",
         type: "rawlist",
-        message: "What information would you like view?",
+        message: "What information would you like to view?",
         choices: [
             "Employees",
             "Departments",
             "Roles",
-            "Department budgets"
         ]
         }
     ]).then(function(answer) {
@@ -314,8 +316,6 @@ function userView() {
                 }      
             )
             break;
-            case "Department budgets": 
-                seeBudget()
         }
     })
 }
