@@ -84,6 +84,37 @@ function askUser() {
 }
 
 function userDelete() {
+    inquirer
+    .prompt([
+        {
+        name: "view",
+        type: "rawlist",
+        message: "What information would you like to delete?",
+        choices: [
+            "Employees",
+            "Departments",
+            "Roles"
+        ]
+        }
+    ]).then(function(answer) {
+        switch (answer.view) {
+        
+            case "Employees":
+                deleteEmployee()
+            break;
+            case "Departments":
+                deleteDepartments()
+            break;
+            case "Roles":
+                deleteRoles()
+            break;
+
+
+}
+    })
+}
+
+function deleteEmployee() {
     connection.query("SELECT employee.last_name FROM employee", function(err, answer) {
          if (err) throw err
          console.log(answer)
@@ -436,32 +467,47 @@ function addEmployee() {
     
 
     function userUpdate() {
+        connection.query("SELECT employee.last_name, role.title FROM employee JOIN role ON employee.role_id = role.id;", 
+        function(err, answer) {
+             if (err) throw err;
+             console.log(answer)
         inquirer
         .prompt([
             {
-            name: "last_name",
-            type: "input",
-            message: "Enter employee's last name"
+            name: "employee",
+            type: "rawlist",
+            message: "Choose employee to update.",
+            choices: function() {
+                var lastName = [];
+                for (var i = 0; i < answer.length; i++) {
+                  lastName.push(answer[i].last_name);
+                }
+                return lastName;
+              },
             },
             {
-            name: "role",
-            type: "rawlist",
-            message: "Enter employee's new role",
-            choices: chooseRole()
-            },
+                name: "role",
+                type: "rawlist",
+                message: "Enter employee's new role",
+                choices: chooseRole()
+                },
+    
+    
         ])
         .then(function(response) {
-            var role = roles.indexOf(response.role_id) + 1
+            var role = roles.indexOf(response.role) + 1
+            console.log(response.employee)
+            console.log(response.role)
+            console.log(role)
 
             connection.query("UPDATE employee SET ? WHERE ?",
             [    
-            {
-                    last_name: response.last_name
-                },
                 {
                     role_id: role
                 },
-                
+                {
+                    last_name: response.employee
+                },
             ], 
                 function(err) {
         if (err) throw err;
@@ -472,6 +518,8 @@ function addEmployee() {
     })                 
 }) 
 
+}
+        )
 }
 
 
