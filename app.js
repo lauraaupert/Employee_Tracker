@@ -21,7 +21,6 @@ connection.connect(function(err) {
 });
 
 var employees = [
-
 ]
 var roles = [
     // "Doctor",
@@ -85,30 +84,40 @@ function askUser() {
 }
 
 function userDelete() {
+    connection.query("SELECT employee.last_name FROM employee", function(err, answer) {
+         if (err) throw err
+         console.log(answer)
     inquirer
     .prompt([
     {
         name: "employee",
         type: "rawlist",
         message: "Choose employee to delete.",
-        choices: chooseEmployee()
+        choices: function() {
+            var lastName = [];
+            for (var i = 0; i < answer.length; i++) {
+              lastName.push(answer[i].last_name);
+            }
+            return lastName;
+          },
         },
     ]).then(function(response) {
-        var employee = employees.indexOf(response.employee) + 1
+        //var employee = employees.indexOf(response.employee) + 1
+        //console.log(employee)
+        console.log(response.employee)
 
     connection.query(
         "DELETE FROM employee WHERE ?",
         {
-            id: employee
+            last_name: response.employee
         },
         function(err) {
             if (err) throw err;
             console.table(response);
             console.log("You successfully deleted an employee");
             askUser()
-        }      
-
-    )
+        })
+})
 })
 }
 
@@ -126,13 +135,16 @@ function userDelete() {
 
 //         }
 function chooseEmployee() {
-    connection.query("SELECT * FROM employee", function(err, answer) {
-      if (err) throw err
-      for (var i = 0; i < answer.length; i++) {
-        employees.push(answer[i].last_name);
+    query = connection.query(
+        "SELECT employee.last_name FROM employee", 
+    function(err, answer) {
+      if (err) throw err;
+      for (i = 0; i < answer.length; i++) {
+        employees.push(answer[i]);
       }
-  
-    })
+
+    }
+    )
     return employees;
   }
 
@@ -149,13 +161,14 @@ function userView() {
             "Employees",
             "Departments",
             "Roles",
+            "Department budgets"
         ]
         }
     ]).then(function(answer) {
         switch (answer.view) {
         
             case "Employees":
-                connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name AS department FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id",
+                connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name AS department FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id",
                 //employee.role_id, employee.manager_id FROM employee",
                 // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
                 
@@ -169,7 +182,7 @@ function userView() {
             )
             break;
             case "Departments":
-                connection.query("SELECT department.name, role.title, role.salary, employee.first_name, employee.last_name FROM department JOIN role on role.department_id = department.id JOIN employee on employee.role_id = role.id ORDER BY department.id",
+                connection.query("SELECT department.name AS department, role.title, role.salary, employee.first_name, employee.last_name FROM department JOIN role on role.department_id = department.id JOIN employee on employee.role_id = role.id ORDER BY department.id",
                    // "SELECT department.name, role.title, role.salary, employee.first_name, employee.last_name, AS Department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id;",
                 //FROM department JOIN role on role.department_id = department.id JOIN employee on employee.role_id = role.id",
                 // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
@@ -184,7 +197,7 @@ function userView() {
             )
             break;
             case "Roles":
-                connection.query("SELECT role.title, role.salary, department.name FROM role INNER JOIN department on role.department_id = department.id",
+                connection.query("SELECT role.title, role.salary, department.name AS department FROM role INNER JOIN department on role.department_id = department.id ORDER BY role.id",
                 // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
                 
                 //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
@@ -196,10 +209,46 @@ function userView() {
                 }      
             )
             break;
+            case "Department budgets": 
+                seeBudget()
         }
     })
 }
 
+// var budget = [1, 2, 3, 4, 5, 6, 7, 8]
+function seeBudget() {
+    connection.query(
+        "SELECT department_id, salary FROM role ORDER BY department_id",
+        function(err, answer) {
+            if (err) throw err;
+        console.table(answer)
+        var dep1 = ""
+        var dep2 = ""
+        var dep3 = ""
+        var dep4 = ""
+        for (i = 0; i < answer.length; i++) {
+
+            if (answer[i].department_id === 1) {
+                dep1 = dep1 + answer[i].salary
+            }
+            if (answer[i].department_id === 2) {
+                dep2 = dep2 + answer[i].salary
+            }
+            if (answer[i].department_id === 3) {
+                dep3 = dep3 + answer[i].salary
+            }
+            if (answer[i].department_id === 4) {
+                dep4 = dep4 + answer[i].salary
+            }
+
+            console.log("dep1:" + dep1 + "dep2:" + dep2 + "dep3:" +dep3 + "dep4:" +dep4)
+
+            
+
+        }
+        }
+    )
+}
 
 
 
@@ -319,7 +368,7 @@ function addEmployee() {
             .then(function(response) {
                 // var role = roles.indexOf(response.role_id) + 1
                 // var manager = managers.indexOf(response.manager_id) + 1
-                 var department = departments.indexOf(response.department_id) + 1
+                 var department = departments.indexOf(response.department_id) +1
                 query = connection.query(
                     "INSERT INTO role SET ?",
                     {
@@ -402,20 +451,23 @@ function addEmployee() {
             },
         ])
         .then(function(response) {
-            //var role = roles.indexOf(response.role_id) + 1
+            var role = roles.indexOf(response.role_id) + 1
 
             connection.query("UPDATE employee SET ? WHERE ?",
-                {
+            [    
+            {
                     last_name: response.last_name
                 },
                 {
-                    role_id: response.role
-                }, 
+                    role_id: role
+                },
+                
+            ], 
                 function(err) {
         if (err) throw err;
-        // console.table(response);
+        console.table(response);
         console.log("You successfully updated employee's role");
-        // askUser()
+        askUser()
     
     })                 
 }) 
