@@ -20,7 +20,9 @@ connection.connect(function(err) {
   askUser();
 });
 
-var employees = []
+var employees = [
+
+]
 var roles = [
     // "Doctor",
     // "Engineer",
@@ -92,7 +94,7 @@ function userDelete() {
         choices: chooseEmployee()
         },
     ]).then(function(response) {
-        var employee = employees.indexOf(response.employee)
+        var employee = employees.indexOf(response.employee) + 1
 
     connection.query(
         "DELETE FROM employee WHERE ?",
@@ -110,20 +112,30 @@ function userDelete() {
 })
 }
 
-function chooseEmployee() {
-    connection.query(
-        "SELECT id, last_name FROM employee",
-        function(err, answer) {
-            if (err) throw err;
-            for (var i = 0; i < answer.length; i++) {
-              employees.push(answer[i].last_name);
-            }
-        console.log(employees)
-          })
-          
-          return employees;
+// function chooseEmployee() {
+//     connection.query(
+//         "SELECT last_name FROM employee",
+//         function(err, answer) {
+//             if (err) throw err;
+//             for (var i = 0; i < answer.length; i++) {
+//               employees.push(answer[i].last_name);
+//             }
+//           })
+//           console.table(employees)
+//           return employees;
 
-        }
+//         }
+function chooseEmployee() {
+    connection.query("SELECT * FROM employee", function(err, answer) {
+      if (err) throw err
+      for (var i = 0; i < answer.length; i++) {
+        employees.push(answer[i].last_name);
+      }
+  
+    })
+    return employees;
+  }
+
 
 
 function userView() {
@@ -143,7 +155,8 @@ function userView() {
         switch (answer.view) {
         
             case "Employees":
-                connection.query("SELECT employee.first_name, employee.last_name, employee.role_id, employee.manager_id FROM employee",
+                connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name AS department FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id",
+                //employee.role_id, employee.manager_id FROM employee",
                 // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
                 
                 //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
@@ -156,7 +169,9 @@ function userView() {
             )
             break;
             case "Departments":
-                connection.query("SELECT department.name FROM department",
+                connection.query("SELECT department.name, role.title, role.salary, employee.first_name, employee.last_name FROM department JOIN role on role.department_id = department.id JOIN employee on employee.role_id = role.id ORDER BY department.id",
+                   // "SELECT department.name, role.title, role.salary, employee.first_name, employee.last_name, AS Department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id;",
+                //FROM department JOIN role on role.department_id = department.id JOIN employee on employee.role_id = role.id",
                 // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
                 
                 //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
@@ -169,7 +184,7 @@ function userView() {
             )
             break;
             case "Roles":
-                connection.query("SELECT role.title, role.salary, role.department_id FROM role",
+                connection.query("SELECT role.title, role.salary, department.name FROM role INNER JOIN department on role.department_id = department.id",
                 // role.title, role.salary, department.name, FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id;",
                 
                 //CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role_id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;",
@@ -335,26 +350,7 @@ function addEmployee() {
               return managers;
             }
 
-    function chooseEmployee() {
-        connection.query(
-            "SELECT last_name FROM employee",
-            function(err, answer) {
-                if (err) throw err;
-                for (var i = 0; i < answer.length; i++) {
-                  employees.push(answer[i].last_name);
-                }
-            
-              })
-              
-              return employees;
-
-            }
-      
-                //console.table()
-                //askUser()
-            
-    //         })                 
-    // }      
+     
 
     
 
