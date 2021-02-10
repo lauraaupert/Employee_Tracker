@@ -99,6 +99,7 @@ function userDelete() {
             "Roles"
         ]
         }
+        
     ]).then(function(answer) {
         switch (answer.view) {
         
