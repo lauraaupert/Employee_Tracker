@@ -19,7 +19,7 @@ GitHub Repository: https://github.com/lauraaupert/Employee_Tracker
 ## USER STORY AND REQUIREMENTS <a name="USER"></a>
 As a business owner\
 I want to be able to view and manage the departments, roles, and employees in my company\
-So that I can organize and plan my business\
+So that I can organize and plan my business
 
 This is a command-line app that allows the user to:
 
