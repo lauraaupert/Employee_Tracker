@@ -9,6 +9,8 @@ Technology used: Node.js, JavaScript, inquirer, console.table, MySQL
 
 GitHub Repository: https://github.com/lauraaupert/Employee_Tracker
 
+Demo: https://drive.google.com/file/d/1LQ4SorIXiQuK7CyShbDaPvX_zwedqhl1/view
+
 ## TABLE OF CONTENTS
     
 [User Story and Requirements](#USER)      
