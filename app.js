@@ -364,24 +364,21 @@ function chooseDepartment() {
               return departments;
 }
     
-    function chooseRole() {
-        connection.query("SELECT * FROM role", function(err, answer) {
-          if (err) throw err
-          for (var i = 0; i < answer.length; i++) {
-            roles.push(answer[i].title);
-          }
-      
-        })
+function chooseRole() {
+    connection.query("SELECT * FROM role", function(err, answer) {
+        if (err) throw err
+        for (var i = 0; i < answer.length; i++) {
+        roles.push(answer[i].title);
+        }
+    })
         return roles;
-      }
+}
 
-    
-
-    function userUpdate() {
-        connection.query("SELECT employee.last_name, role.title FROM employee JOIN role ON employee.role_id = role.id;", 
+function userUpdate() {
+    connection.query("SELECT employee.last_name, role.title FROM employee JOIN role ON employee.role_id = role.id;", 
         function(err, answer) {
-             if (err) throw err;
-             console.log(answer)
+            if (err) throw err;
+            console.log(answer)
         inquirer
         .prompt([
             {
@@ -401,16 +398,10 @@ function chooseDepartment() {
                 type: "rawlist",
                 message: "Enter employee's new role",
                 choices: chooseRole()
-                },
-    
-    
+            },
         ])
         .then(function(response) {
             var role = roles.indexOf(response.role) + 1
-            console.log(response.employee)
-            console.log(response.role)
-            console.log(role)
-
             connection.query("UPDATE employee SET ? WHERE ?",
             [    
                 {
@@ -420,17 +411,14 @@ function chooseDepartment() {
                     last_name: response.employee
                 },
             ], 
-                function(err) {
-        if (err) throw err;
-        console.table(response);
-        console.log("You successfully updated employee's role");
-        askUser()
-    
-    })                 
-}) 
-
-}
-        )
+            function(err) {
+                if (err) throw err;
+                console.table(response);
+                console.log("You successfully updated employee's role");
+                askUser()
+            })                 
+        }) 
+    })
 }
 
 
