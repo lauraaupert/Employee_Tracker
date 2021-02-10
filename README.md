@@ -7,6 +7,8 @@ The employee tracker app allows the user to add, view, update, and delete  depar
 
 Technology used: Node.js, JavaScript, inquirer, console.table, MySQL
 
+GitHub Repository: https://github.com/lauraaupert/Employee_Tracker
+
 ## TABLE OF CONTENTS
     
 [User Story and Requirements](#USER)      
